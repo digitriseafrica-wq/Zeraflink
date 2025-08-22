@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+	--color-maroon: #76232E;
+	--color-sky: #AFD3F0;
+	--color-espresso: #211815;
+	--color-olive: #44573E;
+	--color-offwhite: #FAF5EF;
+}
+
+html, body, #__next { height: 100%; }
+
+.btn-primary {
+	@apply inline-flex items-center justify-center rounded-md bg-maroon px-4 py-2 text-offwhite hover:bg-[#5C1B25] transition-colors;
+}
+
+.btn-secondary {
+	@apply inline-flex items-center justify-center rounded-md bg-sky px-4 py-2 text-espresso hover:bg-[#8CB9D4] transition-colors;
+}

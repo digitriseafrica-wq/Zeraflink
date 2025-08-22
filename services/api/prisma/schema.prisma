@@ -1,0 +1,117 @@
+// Prisma schema for Zeraflink core
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum DeviceMode {
+  PROFILE
+  DIRECT_LINK
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String?
+  name         String?
+  role         UserRole @default(USER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  profile      Profile?
+}
+
+model Profile {
+  id               String        @id @default(cuid())
+  userId           String        @unique
+  user             User          @relation(fields: [userId], references: [id])
+  username         String        @unique
+  displayName      String
+  bio              String?
+  avatarUrl        String?
+  bannerUrl        String?
+  theme            String        @default("default")
+  primaryEmail     String?
+  phone            String?
+  leadFormEnabled  Boolean       @default(false)
+  links            Link[]
+  devices          Device[]
+  profileViews     ProfileView[]
+  leads            Lead[]
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+}
+
+model Link {
+  id        String     @id @default(cuid())
+  profileId String
+  profile   Profile    @relation(fields: [profileId], references: [id])
+  title     String
+  url       String
+  order     Int         @default(0)
+  clicks    LinkClick[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([profileId])
+}
+
+model Device {
+  id             String     @id @default(cuid())
+  uid            String     @unique
+  profileId      String?
+  profile        Profile?   @relation(fields: [profileId], references: [id])
+  mode           DeviceMode @default(PROFILE)
+  directLinkUrl  String?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@index([profileId])
+}
+
+model ProfileView {
+  id         String   @id @default(cuid())
+  profileId  String
+  profile    Profile  @relation(fields: [profileId], references: [id])
+  createdAt  DateTime @default(now())
+  userAgent  String?
+  referrer   String?
+  ipHash     String?
+
+  @@index([profileId, createdAt])
+}
+
+model LinkClick {
+  id        String   @id @default(cuid())
+  linkId    String
+  link      Link     @relation(fields: [linkId], references: [id])
+  createdAt DateTime @default(now())
+  userAgent String?
+  referrer  String?
+  ipHash    String?
+
+  @@index([linkId, createdAt])
+}
+
+model Lead {
+  id         String   @id @default(cuid())
+  profileId  String
+  profile    Profile  @relation(fields: [profileId], references: [id])
+  name       String
+  email      String
+  message    String?
+  source     String?
+  contacted  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([profileId, createdAt])
+}
